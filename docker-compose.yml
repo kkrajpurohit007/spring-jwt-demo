@@ -1,0 +1,38 @@
+version: "3.9"  # 📝 As of Docker 20.10+, this is recommended. "version" is technically optional now.
+
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: jwt_api_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - jwt_network
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: jwt-app
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/jwt_api_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+    networks:
+      - jwt_network
+
+volumes:
+  mysql_data:
+
+networks:
+  jwt_network:
